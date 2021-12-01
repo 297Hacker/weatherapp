@@ -1,0 +1,15 @@
+{
+  "name": "weatherapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "monsterweb",
+  "license": "MIT",
+  "scripts": {
+    "start": "lite-server"
+  },
+  "dependencies": {
+    "lite-server": "^2.6.1",
+    "sass": "^1.44.0",
+    "systemjs": "^6.11.0"
+  }
+}
