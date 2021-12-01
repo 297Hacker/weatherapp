@@ -3,7 +3,10 @@ const submit = document.querySelector('.search-weather');
 const loading = document.querySelector('.load');
 const weatherCity = document.querySelector('.weatherCity');
 const weatherDesc = document.querySelector('.weatherDescription');
-const weatherTemp = document.querySelector('.weatherTemp');
+const weatherCels = document.querySelector('.weatherCelsius');
+const weatherFeelsLike = document.querySelector('.weatherFeelsLike');
+const weatherSpeed = document.querySelector('.weatherWindSpeed');
+const weatherFah = document.querySelector('.weatherFah');
 
 submit.addEventListener('click', searchWeather);
 
@@ -29,10 +32,13 @@ class Http {
 }
 
 class weatherData {
-    constructor(name, description) {
+    constructor(name, description, cels, feelsLike, windSpeed) {
         this.name = name;
         this.description = description;
-        this.temperature = ''
+        this.cels = cels;
+        this.feelsLike = feelsLike;
+        this.windSpeed = windSpeed;
+        this.fah = '';
     }
 }
 
@@ -41,27 +47,35 @@ const weatherProxyHandler = {
         return Reflect.get(target, property);
     },
     set: function (target, property, value) {
-        const newValue = (value * 1.8 + 32).toFixed(2) + 'F.';
+        const newValue = (value * 1.8 + 32).toFixed(2) + '°F';
         return Reflect.set(target, property, newValue);
     }
 };
 
 function searchWeather() {
     const searchedCity = input.value.trim();
+    const URL = 'http://api.openweathermap.org/data/2.5/weather?q=' + searchedCity + '&units=metric&appid=' + APP_ID;
+
     if (searchedCity.length === 0) {
         alert("enter a city name");
     }
-    const URL = 'http://api.openweathermap.org/data/2.5/weather?q=' + searchedCity + '&units=metric&appid=' + APP_ID;
+    loading.classList.add('active');
     Http.fetchData(URL).then(response => {
-        const WEATHER_DATA = new weatherData(searchedCity, response.weather[0].description);
+        const WEATHER_DATA = new weatherData(searchedCity, response.weather[0].description, response.main.temp, response.main.feels_like, response.wind.speed);
         const WEATHER_PROXY = new Proxy(WEATHER_DATA, weatherProxyHandler);
-        WEATHER_PROXY.temperature = response.main.temp;
+        WEATHER_PROXY.fah = response.main.temp;
         updateWeather(WEATHER_PROXY);
     }).catch(err => console.log(err));
+
 }
 
 function updateWeather(weatherData) {
     weatherCity.textContent = weatherData.name;
     weatherDesc.textContent = weatherData.description;
-    weatherTemp.textContent = weatherData.temperature;
+    weatherCels.textContent = Math.round(weatherData.cels) + "°C";
+    weatherFeelsLike.textContent = weatherData.feelsLike;
+    weatherSpeed.textContent = weatherData.windSpeed;
+    weatherFah.textContent = weatherData.fah;
+
+    loading.classList.remove('active');
 }
